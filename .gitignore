@@ -1,0 +1,15 @@
+# youtrip-listening: this repo is public.
+# Consumer posts, display names and reports (PDPA) and API keys never go in it.
+youtrip-listening/data/
+youtrip-listening/reports/
+youtrip-listening/logs/
+youtrip-listening/out/
+youtrip-listening/*.log
+youtrip-listening/config/apify_token
+youtrip-listening/config/*token*
+youtrip-listening/config/*secret*
+youtrip-listening/**/*api_key*
+youtrip-listening/**/*apikey*
+youtrip-listening/**/.env
+youtrip-listening/**/__pycache__/
+.DS_Store
