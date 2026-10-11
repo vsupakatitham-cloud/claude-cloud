@@ -1,0 +1,269 @@
+<meta charset="utf-8">
+<title>Thai Outbound Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F5F6F8; --surface:#FFFFFF; --surface2:#EEF1F5; --ink:#1A222C; --muted:#5E6B78; --rule:#DFE4EA;
+  --accent:#2B45A3; --accent-soft:#E4E9F8; --good:#1E7A4B; --good-soft:#E1F3E8; --bad:#B3261E; --bad-soft:#FBE6E3;
+  --warn:#8A5A00; --warn-soft:#FBF0D6; --prev:#AEB7C1;
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1216; --surface:#161B21; --surface2:#1E252D; --ink:#E7EBEF; --muted:#97A3AF; --rule:#2A323C;
+    --accent:#8AA0F0; --accent-soft:#1E2740; --good:#4FCB8B; --good-soft:#15301F; --bad:#F2716A; --bad-soft:#3A1A17;
+    --warn:#E0B24C; --warn-soft:#332A12; --prev:#4C5763;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1216; --surface:#161B21; --surface2:#1E252D; --ink:#E7EBEF; --muted:#97A3AF; --rule:#2A323C;
+  --accent:#8AA0F0; --accent-soft:#1E2740; --good:#4FCB8B; --good-soft:#15301F; --bad:#F2716A; --bad-soft:#3A1A17;
+  --warn:#E0B24C; --warn-soft:#332A12; --prev:#4C5763;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 28px 64px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;padding-bottom:20px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+h1{font-family:var(--display);font-weight:700;font-size:38px;line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:10px 0 0;color:var(--muted);max-width:62ch}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;line-height:1.7}
+.meta b{color:var(--ink);font-weight:500}
+h2{font-family:var(--display);font-weight:700;font-size:20px;margin:40px 0 6px;letter-spacing:-.005em}
+.lede{margin:0 0 16px;color:var(--muted);max-width:70ch}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:12px;margin-top:24px}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tile .name{font-family:var(--display);font-weight:700;font-size:15px}
+.tile .body{font-size:11px;color:var(--muted);line-height:1.3;min-height:2.6em}
+.tile .val{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:-.01em;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile .mon{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:999px;line-height:1.5;white-space:nowrap}
+.pill.up{background:var(--good-soft);color:var(--good)}
+.pill.down{background:var(--bad-soft);color:var(--bad)}
+.pill.flat{background:var(--surface2);color:var(--muted)}
+.pill.prelim{background:var(--warn-soft);color:var(--warn)}
+.pill.final{background:var(--surface2);color:var(--muted)}
+.pill.derived{background:var(--accent-soft);color:var(--accent)}
+.tile .next{font-size:11px;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px dashed var(--rule)}
+
+/* table */
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:860px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--rule);white-space:nowrap;vertical-align:top}
+th{font-family:var(--body);font-weight:600;font-size:12px;color:var(--muted);letter-spacing:.02em;position:sticky;top:0;background:var(--surface);z-index:1}
+th:first-child,td:first-child{text-align:left;font-family:var(--mono);font-size:12px;position:sticky;left:0;background:var(--surface);z-index:2}
+td{font-family:var(--mono);font-size:13px}
+td .n{display:block}
+td .y{display:block;font-size:11px;line-height:1.3;margin-top:1px}
+.y.up{color:var(--good)} .y.down{color:var(--bad)} .y.flat{color:var(--muted)}
+td .f{color:var(--warn);font-weight:500;margin-left:2px}
+td .d{color:var(--accent);font-weight:500;margin-left:2px}
+tr.year td{background:var(--surface2);font-family:var(--body);font-weight:600;font-size:12px;color:var(--muted);text-align:left;padding:6px 12px}
+tr.year td:first-child{font-family:var(--body)}
+tr.sum td{font-weight:500;border-top:2px solid var(--rule);background:var(--surface)}
+td.na{color:var(--muted)}
+td.tot{border-left:1px solid var(--rule)}
+th.tot{border-left:1px solid var(--rule)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 2px 0;font-size:12px;color:var(--muted)}
+.legend .f{color:var(--warn);font-weight:600} .legend .d{color:var(--accent);font-weight:600}
+
+/* sparklines */
+.sparks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1000px){.sparks{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:800px){.sparks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.sparks{grid-template-columns:1fr}}
+.spark{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px 10px}
+.spark .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.spark .hd .name{font-family:var(--display);font-weight:700;font-size:14px}
+.spark .hd .ytd{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.spark svg{width:100%;height:auto;display:block;margin-top:6px}
+.spark .axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+.keyline{display:flex;gap:16px;font-size:12px;color:var(--muted);margin:0 0 12px}
+.keyline i{display:inline-block;width:18px;height:0;border-top:2px solid var(--prev);vertical-align:middle;margin-right:6px}
+.keyline i.cur{border-top-color:var(--accent)}
+
+/* sources */
+.srcwrap{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.src{width:100%;min-width:760px;border-collapse:collapse}
+.src th,.src td{text-align:left;white-space:normal;font-family:var(--body);font-size:13px;position:static}
+.src td:first-child{font-family:var(--display);font-weight:700;position:static}
+.src td.mono{font-family:var(--mono);font-size:12px}
+.note{margin:18px 0 0;padding:14px 16px;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:6px;color:var(--muted);font-size:13px;max-width:78ch}
+.note b{color:var(--ink);font-weight:600}
+footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:11px;color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <p class="eyebrow">Thai visitor arrivals by destination from official tourism-board statistics</p>
+    <h1>Thai Outbound Tracker</h1>
+    <p class="sub" id="sub">Monthly arrivals of Thai residents into each destination, as counted at the destination. This is the cleanest public read on Thai outbound travel by corridor, and the number YouTrip's overseas spend rides on.</p>
+  </div>
+  <div class="meta" id="meta"></div>
+</header>
+
+<section class="tiles" id="tiles" aria-label="Latest month by destination"></section>
+
+<h2>Monthly arrivals</h2>
+<p class="lede">2026 rows show the month-on-same-month-2025 change under each figure. The all-destination total is shown only for months where every monthly source has published.</p>
+<div class="tablewrap"><table id="tbl" aria-label="Monthly Thai arrivals by destination"></table></div>
+<div class="legend"><span><span class="f">p</span> preliminary or provisional, may be revised</span><span><span class="d">d</span> derived from cumulative figures, not read off a published row</span><span>— not yet published</span></div>
+
+<div id="lowfreq"></div>
+
+<h2>Shape of the year</h2>
+<p class="lede">Each destination on its own scale. Grey is 2025, blue is 2026 to date.</p>
+<div class="keyline"><span><i></i>2025</span><span><i class="cur"></i>2026</span></div>
+<div class="sparks" id="sparks"></div>
+
+<h2>Sources and release calendar</h2>
+<p class="lede">All figures are arrivals by residence or nationality as each body defines it. They count trips, not people, and include business and VFR travel.</p>
+<div class="srcwrap"><table class="src" id="src"></table></div>
+
+<div class="note" id="notes"></div>
+
+<footer id="foot"></footer>
+</div>
+
+<script>
+const RAW = {"months": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"], "dest": [{"name": "Japan", "key": "japan", "body": "JNTO (Japan National Tourism Organization)", "url": "https://www.jnto.go.jp/statistics/data/visitors-statistics/", "cadence": "Prelim estimate ~15th-20th of M+1 (Wednesday 16:15 JST); provisional exact revision ~2 months after the estimate; year marked definitive ~Aug of following year. Sep 2026 estimate (with exact Jul) due Wed 21 Oct 2026.", "annual": {"2024": 1148848, "2025": 1233103}, "series": [{"m": "2025-01", "v": 96811, "s": "final"}, {"m": "2025-02", "v": 116797, "s": "final"}, {"m": "2025-03", "v": 148226, "s": "final"}, {"m": "2025-04", "v": 158470, "s": "final"}, {"m": "2025-05", "v": 108106, "s": "final"}, {"m": "2025-06", "v": 52059, "s": "final"}, {"m": "2025-07", "v": 48553, "s": "final"}, {"m": "2025-08", "v": 35499, "s": "final"}, {"m": "2025-09", "v": 51283, "s": "final"}, {"m": "2025-10", "v": 125894, "s": "final"}, {"m": "2025-11", "v": 117396, "s": "final"}, {"m": "2025-12", "v": 174009, "s": "final"}, {"m": "2026-01", "v": 115100, "s": "provisional"}, {"m": "2026-02", "v": 116955, "s": "provisional"}, {"m": "2026-03", "v": 160861, "s": "provisional"}, {"m": "2026-04", "v": 164841, "s": "provisional"}, {"m": "2026-05", "v": 98756, "s": "provisional"}, {"m": "2026-06", "v": 48009, "s": "provisional"}, {"m": "2026-07", "v": 53800, "s": "prelim"}, {"m": "2026-08", "v": 32200, "s": "prelim"}, {"m": "2026-09", "v": null, "s": null}], "notes": "Jul-Aug 2026 are rounded first-pass estimates (italic in JNTO's Excel). Jun 2026 exact figure (48,009) replaced the 48,000 estimate on 16 Sep 2026. Jan 2026 115,100 is exact. All 2026 months stay preliminary until ~Aug 2027; 2025 is final.", "freq": "monthly", "nextText": "Sep 2026 due Wed 21 Oct 2026", "urlLabel": "jnto.go.jp", "quarterly": null}, {"name": "Korea", "key": "korea", "body": "Korea Tourism Organization (KTO) Korea Tourism Data Lab, Thailand market bulletins", "url": "https://datalab.visitkorea.or.kr/site/portal/ex/bbs/List.do?cbIdx=1132", "cadence": "Official inbound stats ~26th-28th of M+1; Bangkok-office Thailand bulletin on Data Lab last business day of M+1. Sep 2026 stats due Mon 26 Oct 2026 (bulletin ~30 Oct). Newest month is preliminary and often revised up.", "annual": {"2024": 323856, "2025": 333930}, "series": [{"m": "2025-01", "v": 20447, "s": "final"}, {"m": "2025-02", "v": 20598, "s": "final"}, {"m": "2025-03", "v": 27942, "s": "final"}, {"m": "2025-04", "v": 40689, "s": "final"}, {"m": "2025-05", "v": 29480, "s": "final"}, {"m": "2025-06", "v": 21179, "s": "final"}, {"m": "2025-07", "v": 20856, "s": "final"}, {"m": "2025-08", "v": 18844, "s": "final"}, {"m": "2025-09", "v": 21535, "s": "final"}, {"m": "2025-10", "v": 40937, "s": "final"}, {"m": "2025-11", "v": 32303, "s": "final"}, {"m": "2025-12", "v": 39120, "s": "final"}, {"m": "2026-01", "v": 20438, "s": "final"}, {"m": "2026-02", "v": 25419, "s": "final"}, {"m": "2026-03", "v": 39906, "s": "final"}, {"m": "2026-04", "v": 51362, "s": "final"}, {"m": "2026-05", "v": 29520, "s": "final"}, {"m": "2026-06", "v": 22035, "s": "final"}, {"m": "2026-07", "v": 21318, "s": "final"}, {"m": "2026-08", "v": 19748, "s": "prelim"}, {"m": "2026-09", "v": null, "s": null}], "notes": "Jan-Mar 2025 now read from KTO's all-countries workbook (Aug 2026 release): 20,447 / 20,598 / 27,942, replacing earlier back-derived values. Revisions observed: Jul 2025 18,500->20,856; Sep 2025 19,991->21,535; Nov 2025 30,194->32,303; May 2026 27,442->29,520 (31 Aug 2026 bulletin). Best source: the monthly 한국관광통계 공표 xlsx on Data Lab (cbIdx=1127).", "freq": "monthly", "nextText": "Sep 2026 due Mon 26 Oct 2026", "urlLabel": "datalab.visitkorea.or.kr", "quarterly": null}, {"name": "Taiwan", "key": "taiwan", "body": "Taiwan Tourism Administration statistics (inbound visitors by residence)", "url": "https://stat.taiwan.net.tw/statistics/month/inbound/residence", "cadence": "Released ~25th-29th of M+1 (Aug 2026 released 29 Sep 2026). Sep 2026 due ~26-28 Oct 2026. WAF blocks curl and plain fetch; use the page's Export in a browser.", "annual": {"2024": 400038, "2025": 411646}, "series": [{"m": "2025-01", "v": 26815, "s": "final"}, {"m": "2025-02", "v": 32538, "s": "final"}, {"m": "2025-03", "v": 39414, "s": "final"}, {"m": "2025-04", "v": 42896, "s": "final"}, {"m": "2025-05", "v": 36552, "s": "final"}, {"m": "2025-06", "v": 26984, "s": "final"}, {"m": "2025-07", "v": 27273, "s": "final"}, {"m": "2025-08", "v": 27235, "s": "final"}, {"m": "2025-09", "v": 27401, "s": "final"}, {"m": "2025-10", "v": 40095, "s": "final"}, {"m": "2025-11", "v": 35755, "s": "final"}, {"m": "2025-12", "v": 48688, "s": "final"}, {"m": "2026-01", "v": 33365, "s": "final"}, {"m": "2026-02", "v": 26968, "s": "final"}, {"m": "2026-03", "v": 46138, "s": "final"}, {"m": "2026-04", "v": 43936, "s": "final"}, {"m": "2026-05", "v": 35375, "s": "final"}, {"m": "2026-06", "v": 26444, "s": "final"}, {"m": "2026-07", "v": 29041, "s": "final"}, {"m": "2026-08", "v": 22992, "s": "prelim"}, {"m": "2026-09", "v": null, "s": null}], "notes": "ROC year 114 = 2025, 115 = 2026. Sum of months reconciles to FY totals and to the Jan-Aug 2026 cumulative query (264,259). Release log at admin.taiwan.net.tw/english/info/News?a=1329.", "freq": "monthly", "nextText": "Sep 2026 due ~27 Oct 2026", "urlLabel": "stat.taiwan.net.tw", "quarterly": null}, {"name": "Hong Kong", "key": "hong_kong", "body": "Hong Kong Tourism Board (HKTB) PartnerNet monthly Tourism Statistics PDF", "url": "https://partnernet.hktb.com/en/research_statistics/latest_statistics/index.html", "cadence": "Posted last working day of M+1 (Aug 2026 posted 30 Sep 2026). Sep 2026 due Fri 30 Oct 2026. Cloudflare blocks curl; open in browser.", "annual": {"2024": 521645, "2025": 560681}, "series": [{"m": "2025-01", "v": 39068, "s": "final"}, {"m": "2025-02", "v": 48931, "s": "final"}, {"m": "2025-03", "v": 59170, "s": "final"}, {"m": "2025-04", "v": 54727, "s": "final"}, {"m": "2025-05", "v": 47917, "s": "final"}, {"m": "2025-06", "v": 33635, "s": "final"}, {"m": "2025-07", "v": 40934, "s": "final"}, {"m": "2025-08", "v": 35041, "s": "final"}, {"m": "2025-09", "v": 28025, "s": "derived"}, {"m": "2025-10", "v": 55211, "s": "final"}, {"m": "2025-11", "v": 47577, "s": "final"}, {"m": "2025-12", "v": 70445, "s": "final"}, {"m": "2026-01", "v": 54571, "s": "final"}, {"m": "2026-02", "v": 33979, "s": "final"}, {"m": "2026-03", "v": 75784, "s": "final"}, {"m": "2026-04", "v": 61791, "s": "final"}, {"m": "2026-05", "v": 47340, "s": "final"}, {"m": "2026-06", "v": 30888, "s": "final"}, {"m": "2026-07", "v": 32684, "s": "final"}, {"m": "2026-08", "v": 24577, "s": "prelim"}, {"m": "2026-09", "v": null, "s": null}], "notes": "Sep 2025 derived as residual from cumulative columns (reconciles to FY2025 total). HKTB labels the newest month provisional; no revisions observed (Jan-Aug 2026 cumulative 361,614 equals the sum of months).", "freq": "monthly", "nextText": "Sep 2026 due Fri 30 Oct 2026", "urlLabel": "partnernet.hktb.com", "quarterly": null}, {"name": "Singapore", "key": "singapore", "body": "Singapore Tourism Board (STB) via SingStat table M550001", "url": "https://tablebuilder.singstat.gov.sg/table/TS/M550001", "cadence": "Month M nominally published ~15th of M+1 (STAN + SingStat), but Aug 2026 only appeared on SingStat on 5 Oct 2026. Sep 2026 expected ~15 Oct 2026, possibly later.", "annual": {"2024": 395497, "2025": 386490}, "series": [{"m": "2025-01", "v": 23423, "s": "final"}, {"m": "2025-02", "v": 26711, "s": "final"}, {"m": "2025-03", "v": 29757, "s": "final"}, {"m": "2025-04", "v": 41843, "s": "final"}, {"m": "2025-05", "v": 39123, "s": "final"}, {"m": "2025-06", "v": 26174, "s": "final"}, {"m": "2025-07", "v": 36228, "s": "final"}, {"m": "2025-08", "v": 31917, "s": "final"}, {"m": "2025-09", "v": 26947, "s": "final"}, {"m": "2025-10", "v": 49763, "s": "final"}, {"m": "2025-11", "v": 27797, "s": "final"}, {"m": "2025-12", "v": 26807, "s": "final"}, {"m": "2026-01", "v": 26322, "s": "final"}, {"m": "2026-02", "v": 24956, "s": "final"}, {"m": "2026-03", "v": 32863, "s": "final"}, {"m": "2026-04", "v": 48899, "s": "final"}, {"m": "2026-05", "v": 30067, "s": "final"}, {"m": "2026-06", "v": 23190, "s": "final"}, {"m": "2026-07", "v": 34514, "s": "prelim"}, {"m": "2026-08", "v": 24690, "s": "prelim"}, {"m": "2026-09", "v": null, "s": null}], "notes": "No explicit preliminary flag; newest 1-2 months get small revisions. 2024 monthly Jan = 27,196 (from YoY).", "freq": "monthly", "nextText": "Sep 2026 due ~15 Oct 2026 (Aug came 3 weeks late)", "urlLabel": "tablebuilder.singstat.gov.sg", "quarterly": null}, {"name": "Vietnam", "key": "vietnam", "body": "Vietnam National Authority of Tourism (VNAT) statistics page, data from NSO/GSO", "url": "https://vietnamtourism.gov.vn/statistic/international", "cadence": "By-market table posted within first ~3 days of M+1 (Sep 2026 out by 5 Oct 2026). Oct 2026 due ~3 Nov 2026.", "annual": {"2024": 418054, "2025": 457775}, "series": [{"m": "2025-01", "v": 40464, "s": "final"}, {"m": "2025-02", "v": 37518, "s": "final"}, {"m": "2025-03", "v": 46147, "s": "final"}, {"m": "2025-04", "v": 44759, "s": "final"}, {"m": "2025-05", "v": 36929, "s": "final"}, {"m": "2025-06", "v": 30154, "s": "final"}, {"m": "2025-07", "v": 29125, "s": "final"}, {"m": "2025-08", "v": 31279, "s": "final"}, {"m": "2025-09", "v": 30142, "s": "final"}, {"m": "2025-10", "v": 47694, "s": "final"}, {"m": "2025-11", "v": 40797, "s": "final"}, {"m": "2025-12", "v": 42767, "s": "final"}, {"m": "2026-01", "v": 44755, "s": "final"}, {"m": "2026-02", "v": 38682, "s": "final"}, {"m": "2026-03", "v": 48778, "s": "final"}, {"m": "2026-04", "v": 50812, "s": "final"}, {"m": "2026-05", "v": 40253, "s": "final"}, {"m": "2026-06", "v": 36220, "s": "final"}, {"m": "2026-07", "v": 28308, "s": "final"}, {"m": "2026-08", "v": 40279, "s": "final"}, {"m": "2026-09", "v": 31440, "s": "prelim"}], "notes": "All months labelled 'Uoc tinh' (estimate) by VNAT but no revisions observed; treated as final except the newest month. Direct monthly figures, not YTD-differenced (Jan-Sep 2026 cumulative 359,527 equals the sum of months).", "freq": "monthly", "nextText": "Oct 2026 due ~3 Nov 2026", "urlLabel": "vietnamtourism.gov.vn", "quarterly": null}, {"name": "Malaysia", "key": "malaysia", "body": "Tourism Malaysia visitor-performance infographics, Thailand tourist (overnight) arrivals, cumulative year-to-date only. No single-month country table since Dec 2023.", "url": "https://data.tourism.gov.my/", "cadence": "Infographics every 2-4 months with a 2-3 month lag (Jan-Jun 2026 still the latest at 5 Oct 2026); no fixed calendar. data.gov.my monthly immigration feed resumed (to Aug 2026, next update 31 Oct 2026).", "annual": {"2024": 1639211, "2023": 1551282}, "series": [{"m": "2025-01", "v": null, "s": null}, {"m": "2025-02", "v": null, "s": null}, {"m": "2025-03", "v": null, "s": null}, {"m": "2025-04", "v": null, "s": null}, {"m": "2025-05", "v": null, "s": null}, {"m": "2025-06", "v": null, "s": null}, {"m": "2025-07", "v": null, "s": null}, {"m": "2025-08", "v": null, "s": null}, {"m": "2025-09", "v": null, "s": null}, {"m": "2025-10", "v": null, "s": null}, {"m": "2025-11", "v": null, "s": null}, {"m": "2025-12", "v": null, "s": null}, {"m": "2026-01", "v": null, "s": null}, {"m": "2026-02", "v": null, "s": null}, {"m": "2026-03", "v": null, "s": null}, {"m": "2026-04", "v": null, "s": null}, {"m": "2026-05", "v": null, "s": null}, {"m": "2026-06", "v": null, "s": null}, {"m": "2026-07", "v": null, "s": null}, {"m": "2026-08", "v": null, "s": null}, {"m": "2026-09", "v": null, "s": null}], "notes": "Tourist = overnight; Visitor = tourist + same-day excursionist (large land-border flow). FY2024 tourist 1,639,211 (+5.7%), visitor 2,268,182 (-1.4%). FY2025 country figure not published. The data.gov.my immigration arrivals feed (MyIMMS, by nationality) resumed in Sep 2026 and now runs to Aug 2026: Thailand Jan-Aug 2026 1,620,556 (-5.2% YoY), Aug 2026 175,472 (-26.2%). It is a different measure from Tourism Malaysia's (its Jan-Jun 2026 sum 1,256,701 vs the infographic's 1,199,933 visitors), so it is noted here, not mixed into the table. Interactive dashboard sits behind a registration wall.", "freq": "cumulative", "nextText": "Next infographic unscheduled, likely ~Nov 2026", "urlLabel": "data.tourism.gov.my", "quarterly": [{"q": "2025 Jan–Feb", "v": 292164, "yoy": 12.5, "s": "final", "visitor": 407099, "visitor_yoy": 1.3}, {"q": "2025 Jan–Apr", "v": 593305, "yoy": 9.1, "s": "final", "visitor": 833610, "visitor_yoy": 3.4}, {"q": "2026 Jan–Jun", "v": 845880, "yoy": -3.4, "s": "final", "visitor": 1199933, "visitor_yoy": -3.1}]}, {"name": "China", "key": "china", "body": "No official series. China's National Immigration Administration and Ministry of Culture and Tourism publish no recurring Thai-arrivals count at any frequency.", "url": "https://www.nia.gov.cn/n897453/c1789835/content.html", "cadence": "NIA quarterly/half-year releases name Thailand only by rank (5th source country in H1 2026, no count). Thai MOTS publishes no outbound-by-destination series.", "annual": {}, "series": [{"m": "2025-01", "v": null, "s": null}, {"m": "2025-02", "v": null, "s": null}, {"m": "2025-03", "v": null, "s": null}, {"m": "2025-04", "v": null, "s": null}, {"m": "2025-05", "v": null, "s": null}, {"m": "2025-06", "v": null, "s": null}, {"m": "2025-07", "v": null, "s": null}, {"m": "2025-08", "v": null, "s": null}, {"m": "2025-09", "v": null, "s": null}, {"m": "2025-10", "v": null, "s": null}, {"m": "2025-11", "v": null, "s": null}, {"m": "2025-12", "v": null, "s": null}, {"m": "2026-01", "v": null, "s": null}, {"m": "2026-02", "v": null, "s": null}, {"m": "2026-03", "v": null, "s": null}, {"m": "2026-04", "v": null, "s": null}, {"m": "2026-05", "v": null, "s": null}, {"m": "2026-06", "v": null, "s": null}, {"m": "2026-07", "v": null, "s": null}, {"m": "2026-08", "v": null, "s": null}, {"m": "2026-09", "v": null, "s": null}], "notes": "Best proxies: (1) AOT route data, China-route passengers at Suvarnabhumi 11.1m (+14.6%) and Don Mueang 1.9m (-28.6%) for Oct 2025-Jul 2026, both directions, all nationalities; (2) Sichuan border inspection: 389,000 Thai entries in 2025, +75.4% (Thailand the province's top source market); (3) Chengdu airport 139,600 Thai entries Mar 2024-Mar 2025 (+223.6%). None can be summed into a national figure. Mutual visa waiver in force since Mar 2024.", "freq": "none", "nextText": "No scheduled release", "urlLabel": "nia.gov.cn", "quarterly": null}, {"name": "Australia", "key": "australia", "body": "Australian Bureau of Statistics, Overseas Arrivals and Departures, short-term visitor arrivals by country of residence (original)", "url": "https://www.abs.gov.au/statistics/industry/tourism-and-transport/overseas-arrivals-and-departures-australia/latest-release", "cadence": "Monthly, ~6 weeks after month-end (Jul 2026 released Fri 11 Sep 2026). Aug 2026 due Tue 13 Oct 2026; Sep 2026 12 Nov 2026.", "annual": {"2024": 96430, "2025": 98410}, "series": [{"m": "2025-01", "v": 4510, "s": "final"}, {"m": "2025-02", "v": 6270, "s": "final"}, {"m": "2025-03", "v": 8100, "s": "final"}, {"m": "2025-04", "v": 14120, "s": "final"}, {"m": "2025-05", "v": 9120, "s": "final"}, {"m": "2025-06", "v": 6350, "s": "final"}, {"m": "2025-07", "v": 8960, "s": "final"}, {"m": "2025-08", "v": 8790, "s": "final"}, {"m": "2025-09", "v": 6050, "s": "final"}, {"m": "2025-10", "v": 8190, "s": "final"}, {"m": "2025-11", "v": 9420, "s": "final"}, {"m": "2025-12", "v": 8530, "s": "final"}, {"m": "2026-01", "v": 6860, "s": "final"}, {"m": "2026-02", "v": 6470, "s": "final"}, {"m": "2026-03", "v": 7240, "s": "final"}, {"m": "2026-04", "v": 13960, "s": "final"}, {"m": "2026-05", "v": 7020, "s": "final"}, {"m": "2026-06", "v": 5840, "s": "final"}, {"m": "2026-07", "v": 8040, "s": "prelim"}, {"m": "2026-08", "v": null, "s": null}, {"m": "2026-09", "v": null, "s": null}], "notes": "ABS rounds to the nearest 10. Values unchanged across Jan-2025, Nov-2025, Jun-2026 and Jul-2026 file vintages, so revisions are rare. Latest month treated as preliminary. Cross-check via ABS Data API (OAD_COUNTRY, Thailand 5104).", "freq": "monthly", "nextText": "Aug 2026 due Tue 13 Oct 2026", "urlLabel": "abs.gov.au", "quarterly": null}, {"name": "United States", "key": "united_states", "body": "U.S. National Travel and Tourism Office (NTTO), I-94 arrivals by country of residence, Thailand total arrivals", "url": "https://www.trade.gov/i-94-arrivals-program", "cadence": "Advance ~2 weeks, preliminary ~4-6 weeks, final ~9-11 weeks after month-end, no fixed day (Aug 2026 preliminary posted Sep 2026). Jul 2026 final and Sep 2026 advance due ~mid Oct 2026.", "annual": {"2024": 82902, "2025": 77927}, "series": [{"m": "2025-01", "v": 4907, "s": "final"}, {"m": "2025-02", "v": 3418, "s": "final"}, {"m": "2025-03", "v": 6174, "s": "final"}, {"m": "2025-04", "v": 10264, "s": "final"}, {"m": "2025-05", "v": 8506, "s": "final"}, {"m": "2025-06", "v": 7426, "s": "final"}, {"m": "2025-07", "v": 6105, "s": "final"}, {"m": "2025-08", "v": 6831, "s": "final"}, {"m": "2025-09", "v": 5559, "s": "final"}, {"m": "2025-10", "v": 7523, "s": "final"}, {"m": "2025-11", "v": 4720, "s": "final"}, {"m": "2025-12", "v": 6494, "s": "final"}, {"m": "2026-01", "v": 4829, "s": "final"}, {"m": "2026-02", "v": 3089, "s": "final"}, {"m": "2026-03", "v": 5211, "s": "final"}, {"m": "2026-04", "v": 8785, "s": "final"}, {"m": "2026-05", "v": 7427, "s": "final"}, {"m": "2026-06", "v": 6687, "s": "final"}, {"m": "2026-07", "v": 6223, "s": "prelim"}, {"m": "2026-08", "v": 6059, "s": "prelim"}, {"m": "2026-09", "v": null, "s": null}], "notes": "Three-tier revision (advance, preliminary, final); Jul and Aug 2026 are preliminary. The historical-data dropdown page lags the program page by months; use the program page. YTD in each file reconciles to the sum of months.", "freq": "monthly", "nextText": "Jul final + Sep advance due ~mid Oct 2026", "urlLabel": "trade.gov", "quarterly": null}, {"name": "United Kingdom", "key": "united_kingdom", "body": "Home Office visitor visas issued to Thai nationals (quarterly proxy). ONS IPS visits are the official series but lag 4-7 months and have no 2026 quarter yet.", "url": "https://www.gov.uk/government/statistical-data-sets/immigration-system-statistics-data-tables", "cadence": "Home Office quarterly, ~2 months after quarter end (Q2 2026 published 27 Aug 2026; Q3 2026 due ~late Nov 2026). ONS 'Travel trends: 2025' (2025 Q1-Q4 visits) confirmed for 16 Oct 2026.", "annual": {"2024": 53900, "2025": 50149}, "series": [{"m": "2025-01", "v": null, "s": null}, {"m": "2025-02", "v": null, "s": null}, {"m": "2025-03", "v": null, "s": null}, {"m": "2025-04", "v": null, "s": null}, {"m": "2025-05", "v": null, "s": null}, {"m": "2025-06", "v": null, "s": null}, {"m": "2025-07", "v": null, "s": null}, {"m": "2025-08", "v": null, "s": null}, {"m": "2025-09", "v": null, "s": null}, {"m": "2025-10", "v": null, "s": null}, {"m": "2025-11", "v": null, "s": null}, {"m": "2025-12", "v": null, "s": null}, {"m": "2026-01", "v": null, "s": null}, {"m": "2026-02", "v": null, "s": null}, {"m": "2026-03", "v": null, "s": null}, {"m": "2026-04", "v": null, "s": null}, {"m": "2026-05", "v": null, "s": null}, {"m": "2026-06", "v": null, "s": null}, {"m": "2026-07", "v": null, "s": null}, {"m": "2026-08", "v": null, "s": null}, {"m": "2026-09", "v": null, "s": null}], "notes": "Annual figures here are visas issued (2024 = 53,900; 2025 = 50,149), not visits. ONS IPS visits by Thai residents: 2024 = 72,000 (Q1 7k, Q2 26k, Q3 28k, Q4 11k; confirmed in ONS's corrected 2024 file of 4 Sep 2026); 2025 Q1 12,000 and Q2 14,000 provisional, 95% CI roughly +/-30-60%. ONS 'Travel trends: 2025' (16 Oct 2026) adds Q3-Q4 and will revise Q1-Q2 under new weighting. A visa can cover several trips over its validity, so treat the proxy as directional.", "freq": "quarterly", "nextText": "ONS 2025 visits 16 Oct 2026; Q3 2026 visas ~late Nov 2026", "urlLabel": "gov.uk immigration statistics", "quarterly": [{"q": "2025-Q1", "v": 14410, "s": "final"}, {"q": "2025-Q2", "v": 14616, "s": "final"}, {"q": "2025-Q3", "v": 11764, "s": "final"}, {"q": "2025-Q4", "v": 9359, "s": "final"}, {"q": "2026-Q1", "v": 12794, "s": "final"}, {"q": "2026-Q2", "v": 9820, "s": "prelim"}]}]};
+const META = {"through": "Aug 2026 (Vietnam Sep 2026; Australia Jul 2026)", "updated": "5 Oct 2026", "next": "5 Nov 2026", "notes": "<b>Reading the table.</b> Japan's 2026 months are JNTO estimates that get an exact revision about two months after the estimate, so expect small changes. Korea's Jan–Mar 2025 are now read from KTO's own all-countries workbook, and KTO revised May 2026 up from 27,442 to 29,520. Korea's Jan 2026 (20,438) is as printed by KTO. Hong Kong's Sep 2025 is the residual of HKTB's cumulative columns. Vietnam labels every month an estimate but has never revised one. The United States runs three revision tiers, so its newest three months move. Australia rounds to the nearest ten. <b>Definitions differ.</b> Singapore, Hong Kong, Australia and the United States count arrivals by country of residence; Japan, Korea and Taiwan by nationality or residence as each body defines it; Malaysia's headline is overnight tourists; the United Kingdom is visitor visas issued, a proxy for visits. <b>Refresh.</b> A scheduled task on this Mac re-reads every source on the 5th of each month, updates the CSV and markdown copies in the YouTrip project folder and republishes this page. Only an official figure changes a cell."};
+const DATA = {months: RAW.months, dest: RAW.dest.filter(d=>(d.freq||"monthly")==="monthly")};
+const LOW = RAW.dest.filter(d=>["quarterly","cumulative"].includes(d.freq||"monthly"));
+const NONE = RAW.dest.filter(d=>(d.freq||"monthly")==="none");
+const fmt = n => n==null ? "—" : n.toLocaleString("en-US");
+const pct = y => y==null ? "" : (y>=0?"+":"") + y.toFixed(1) + "%";
+const cls = y => y==null ? "flat" : (y>0.5 ? "up" : (y<-0.5 ? "down" : "flat"));
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const label = m => MON[+m.slice(5)-1] + " " + m.slice(0,4);
+const get = (d,m) => d.series.find(s=>s.m===m);
+const yoy = (d,m) => { if(!m.startsWith("2026")) return null; const c=get(d,m), p=get(d,"2025"+m.slice(4)); return (c&&c.v!=null&&p&&p.v)? (c.v/p.v-1)*100 : null; };
+const flag = s => s==="final" ? "" : (s==="derived" ? '<span class="d">d</span>' : '<span class="f">p</span>');
+
+// meta
+document.getElementById("meta").innerHTML =
+  `Data through <b>${META.through}</b><br>Last refreshed <b>${META.updated}</b><br>Next refresh <b>${META.next}</b>`;
+
+// tiles
+const NUMWORD = ["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
+document.getElementById("sub").textContent = `Arrivals of Thai residents into ${NUMWORD[RAW.dest.length]||RAW.dest.length} destinations, as counted at the destination. This is the cleanest public read on Thai outbound travel by corridor, and the number YouTrip's overseas spend rides on.`;
+document.getElementById("tiles").innerHTML = RAW.dest.filter(d=>(d.freq||"monthly")!=="none").map(d=>{
+  if((d.freq||"monthly")!=="monthly"){ const q=d.quarterly.filter(x=>x.v!=null); const last=q[q.length-1]; const prev=d.quarterly.find(x=>x.q===last.q.replace("2026","2025")); const y=(last.yoy!=null)?last.yoy:((prev&&prev.v)?(last.v/prev.v-1)*100:null); const st=last.s==="final"?"final":(last.s==="derived"?"derived":"prelim");
+    return `<div class="tile"><div class="name">${d.name}</div><div class="body">${d.body}</div><div class="val">${fmt(last.v)}</div><div class="mon">${last.q.replace("-"," ")} · ${d.freq}</div><div class="row"><span class="pill ${cls(y)}">${y==null?"n/a":pct(y)+" YoY"}</span><span class="pill ${st}">${st}</span></div><div class="next">${d.nextText}</div></div>`; }
+  const pub = d.series.filter(s=>s.v!=null); const last = pub[pub.length-1]; const y = yoy(d,last.m);
+  const st = last.s==="final" ? "final" : (last.s==="derived" ? "derived" : "prelim");
+  return `<div class="tile">
+    <div class="name">${d.name}</div>
+    <div class="body">${d.body}</div>
+    <div class="val">${fmt(last.v)}</div>
+    <div class="mon">${label(last.m)}</div>
+    <div class="row"><span class="pill ${cls(y)}">${y==null?"n/a":pct(y)+" YoY"}</span><span class="pill ${st}">${st}</span></div>
+    <div class="next">${d.nextText}</div>
+  </div>`;}).join("");
+
+// table
+(function(){
+  const t = document.getElementById("tbl");
+  let h = `<thead><tr><th>Month</th>${DATA.dest.map(d=>`<th>${d.name}</th>`).join("")}<th class="tot">All-destination total</th></tr></thead><tbody>`;
+  const years = ["2025","2026"];
+  years.forEach(yr=>{
+    const ms = DATA.months.filter(m=>m.startsWith(yr));
+    h += `<tr class="year"><td colspan="${DATA.dest.length+2}">${yr}</td></tr>`;
+    let sums = DATA.dest.map(()=>0), sumsPrev = DATA.dest.map(()=>0), allTot = 0, allComplete = true;
+    ms.forEach(m=>{
+      let tot=0, complete=true;
+      h += `<tr><td>${label(m)}</td>`;
+      DATA.dest.forEach((d,i)=>{
+        const s = get(d,m); const y = yoy(d,m);
+        if(!s || s.v==null){ h += `<td class="na">—</td>`; complete=false; return; }
+        tot += s.v; sums[i] += s.v;
+        if(yr==="2026"){ const p=get(d,"2025"+m.slice(4)); if(p&&p.v) sumsPrev[i]+=p.v; }
+        h += `<td><span class="n">${fmt(s.v)}${flag(s.s)}</span>${y!=null?`<span class="y ${cls(y)}">${pct(y)}</span>`:""}</td>`;
+      });
+      if(complete){ allTot += tot; } else { allComplete = false; }
+      h += `<td class="tot ${complete?"":"na"}">${complete?fmt(tot):"—"}</td></tr>`;
+    });
+    // year sum row
+    const completeMonths = ms.filter(m=>DATA.dest.every(d=>{const s=get(d,m);return s&&s.v!=null;}));
+    const lbl = yr==="2025" ? "2025 total" : `2026 to date (${completeMonths.length} mo, all published)`;
+    h += `<tr class="sum"><td>${lbl}</td>`;
+    DATA.dest.forEach((d,i)=>{
+      if(yr==="2025"){ h += `<td>${fmt(sums[i])}</td>`; }
+      else {
+        // to-date only over completeMonths so columns are comparable
+        const cur = completeMonths.reduce((a,m)=>a+get(d,m).v,0);
+        const prev = completeMonths.reduce((a,m)=>a+get(d,"2025"+m.slice(4)).v,0);
+        const y = prev? (cur/prev-1)*100 : null;
+        h += `<td><span class="n">${fmt(cur)}</span><span class="y ${cls(y)}">${pct(y)}</span></td>`;
+      }
+    });
+    if(yr==="2025"){ h += `<td class="tot">${fmt(sums.reduce((a,b)=>a+b,0))}</td>`; }
+    else {
+      const cur = completeMonths.reduce((a,m)=>a+DATA.dest.reduce((b,d)=>b+get(d,m).v,0),0);
+      const prev = completeMonths.reduce((a,m)=>a+DATA.dest.reduce((b,d)=>b+get(d,"2025"+m.slice(4)).v,0),0);
+      const y = prev?(cur/prev-1)*100:null;
+      h += `<td class="tot"><span class="n">${fmt(cur)}</span><span class="y ${cls(y)}">${pct(y)}</span></td>`;
+    }
+    h += `</tr>`;
+  });
+  t.innerHTML = h + "</tbody>";
+})();
+
+// lower-frequency series (quarterly / half-year)
+if(LOW.length){
+  let out = `<h2 style="margin-top:28px">Lower-frequency series</h2><p class="lede">These bodies do not publish Thai arrivals monthly. Each is shown at the finest frequency it publishes; 2026 rows carry the change on the same period of 2025.</p><div class="sparks" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">`;
+  LOW.forEach(d=>{
+    const rows = d.quarterly.map(x=>{ const pv=d.quarterly.find(z=>z.q===x.q.replace("2026","2025")); const y=(x.yoy!=null)?x.yoy:((x.q.startsWith("2026")&&pv&&pv.v)?(x.v/pv.v-1)*100:null);
+      return `<tr><td>${x.q.replace("-"," ")}</td><td><span class="n">${fmt(x.v)}${flag(x.s)}</span></td><td><span class="y ${cls(y)}">${y!=null?pct(y):"—"}</span></td>${x.visitor?`<td class="na">${fmt(x.visitor)} <span class="y ${cls(x.visitor_yoy)}" style="display:inline">${pct(x.visitor_yoy)}</span></td>`:""}</tr>`; }).join("");
+    const extra = d.quarterly.some(x=>x.visitor) ? `<th>Visitor incl. same-day</th>` : "";
+    out += `<div class="spark"><div class="hd"><span class="name">${d.name}</span><span class="ytd">${d.freq}</span></div><p style="margin:6px 0 8px;font-size:12px;color:var(--muted)">${d.body}</p><div class="tablewrap" style="border:0;border-radius:0"><table style="min-width:0"><thead><tr><th>Period</th><th>${d.name==="United Kingdom"?"Visas issued":"Tourists"}</th><th>YoY</th>${extra}</tr></thead><tbody>${rows}</tbody></table></div><div class="next" style="font-size:11px;color:var(--muted);margin-top:8px">${d.nextText}</div></div>`;
+  });
+  document.getElementById("lowfreq").innerHTML = out + "</div>";
+}
+if(NONE.length){
+  document.getElementById("lowfreq").innerHTML += NONE.map(d=>`<div class="note" style="margin-top:14px"><b>${d.name}: not trackable from official statistics.</b> ${d.body} ${d.cadence} <b>Best proxies.</b> ${d.notes}</div>`).join("");
+}
+
+// sparklines
+document.getElementById("sparks").innerHTML = DATA.dest.map(d=>{
+  const W=320,H=96,P=6;
+  const a25 = DATA.months.filter(m=>m.startsWith("2025")).map(m=>get(d,m)?.v ?? null);
+  const a26 = DATA.months.filter(m=>m.startsWith("2026")).map(m=>get(d,m)?.v ?? null);
+  const all = [...a25,...a26].filter(v=>v!=null); const max=Math.max(...all), min=0;
+  const x = i => P + i*(W-2*P)/11; const y = v => H-P - (v-min)/(max-min)*(H-2*P);
+  const path = arr => { let s="",pen=false; arr.forEach((v,i)=>{ if(v==null){pen=false;return;} s += (pen?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)+" "; pen=true;}); return s; };
+  const last26 = a26.map((v,i)=>[v,i]).filter(p=>p[0]!=null).pop();
+  const pub = d.series.filter(s=>s.v!=null); const lastM = pub[pub.length-1].m;
+  const mo26 = DATA.months.filter(m=>m.startsWith("2026")&&get(d,m)&&get(d,m).v!=null);
+  const cur = mo26.reduce((s,m)=>s+get(d,m).v,0), prev = mo26.reduce((s,m)=>s+get(d,"2025"+m.slice(4)).v,0);
+  const yy = prev?(cur/prev-1)*100:null;
+  return `<div class="spark"><div class="hd"><span class="name">${d.name}</span><span class="ytd">Jan–${MON[mo26.length-1]} 2026 ${fmt(cur)} · <span class="${cls(yy)}" style="color:var(--${cls(yy)==="up"?"good":cls(yy)==="down"?"bad":"muted"})">${pct(yy)}</span></span></div>
+  <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${d.name}: 2025 versus 2026 monthly Thai arrivals">
+    <line x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}" stroke="var(--rule)" stroke-width="1"/>
+    <path d="${path(a25)}" fill="none" stroke="var(--prev)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="${path(a26)}" fill="none" stroke="var(--accent)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>
+    ${last26?`<circle cx="${x(last26[1]).toFixed(1)}" cy="${y(last26[0]).toFixed(1)}" r="3.5" fill="var(--accent)"/>`:""}
+  </svg>
+  <div class="axis"><span>Jan</span><span>Apr</span><span>Jul</span><span>Oct</span><span>Dec</span></div></div>`;
+}).join("");
+
+// sources
+document.getElementById("src").innerHTML = `<thead><tr><th>Destination</th><th>Publisher and series</th><th>Release timing</th><th>Latest</th><th>Full-year 2025</th><th>Where</th></tr></thead><tbody>` +
+  RAW.dest.map(d=>{ let latest; const f=d.freq||"monthly"; if(f==="none"){ latest="none"; } else if(f!=="monthly"){ const q=d.quarterly.filter(x=>x.v!=null); latest=q[q.length-1].q.replace("-"," "); } else { const pub=d.series.filter(s=>s.v!=null); latest=label(pub[pub.length-1].m); }
+    const fy = (d.annual&&d.annual["2025"]) ? `${fmt(d.annual["2025"])} <span style="color:var(--muted)">(${pct((d.annual["2025"]/d.annual["2024"]-1)*100)})</span>${f==="quarterly"?" <span style=\"color:var(--muted)\">visas</span>":""}` : "—";
+    return `<tr><td>${d.name}</td><td>${d.body}</td><td>${d.cadence}</td><td class="mono">${latest}</td><td class="mono">${fy}</td><td class="mono"><a href="${d.url}" target="_blank" rel="noopener">${d.urlLabel}</a></td></tr>`; }).join("") + "</tbody>";
+
+document.getElementById("notes").innerHTML = META.notes;
+document.getElementById("foot").textContent = `Compiled ${META.updated} from the official sources above. Figures are as published at that date; preliminary months are revised by the publishers and picked up at the next refresh.`;
+</script>

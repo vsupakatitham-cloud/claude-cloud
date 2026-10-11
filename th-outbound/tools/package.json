@@ -1,0 +1,9 @@
+{
+  "name": "th-outbound-tools",
+  "private": true,
+  "description": "Browser helpers for the Thai Outbound Tracker monthly refresh",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
