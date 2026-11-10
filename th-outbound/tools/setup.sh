@@ -8,7 +8,8 @@ set -euo pipefail
 cd "$(dirname "$0")"
 export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 npm install --no-audit --no-fund --silent
-python3 -c "import openpyxl" 2>/dev/null || pip install -q openpyxl
+# Install for the same interpreter that `python3` resolves to (a bare `pip` can belong to another one).
+python3 -c "import openpyxl" 2>/dev/null || python3 -m pip install -q openpyxl 2>/dev/null || python3 -m pip install -q --break-system-packages openpyxl
 need_apt=()
 command -v pdftotext >/dev/null || need_apt+=(poppler-utils)
 command -v certutil  >/dev/null || need_apt+=(libnss3-tools)
